@@ -15,6 +15,7 @@
           <th v-for="(header, index) in headers" :key="index">{{ header}}</th>
         </tr>
       </thead>
+
       <tbody>
         <!-- To do: Refactor into Todo component-->
         <tr v-for="(todo) in todos" :key="todo.id">
@@ -31,13 +32,14 @@
         </tr>
       </tbody>
     </table>
+ 
     <div v-else>
       <p>{{ 'No to do available!' }}</p>
     </div>
   </div>
 </template>
 <script>
-
+ 
 export default {
   name: 'App',
   data() {
@@ -46,10 +48,11 @@ export default {
     todos: [],
     newTodo: {id: null, name: "", done: false, dateCompleted: ""},
     todoButtonLabel: 'Add todo',
-    isUpdate: false
+    isUpdate: false,
+    hasTodos: false
    }
   },
-
+ 
   created() {
 
     this.retrivedDataFromLocalStorage();
@@ -188,6 +191,12 @@ export default {
       handler() {
 
        this.saveDataToLocalStorage();
+
+       if(this.todos?.length > 0) {
+
+        this.hasTodos = true;
+        
+       }
          
       },
 
