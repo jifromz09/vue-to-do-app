@@ -8,7 +8,8 @@
     </form>
 
     <!-- To do: Refactor table into dynamic table-->
-    <table v-if="paginatedTodo?.length > 0" class="todo-table">
+    <table v-if="pagination.paginatedTodo?.length > 0" class="todo-table">
+
       <!-- To do: Refactor table head into separate component-->
       <thead>
         <tr>
@@ -17,7 +18,7 @@
       </thead>
       <tbody>
         <!-- To do: Refactor into Todo component-->
-        <tr v-for="(todo) in paginatedTodo" :key="todo.id">
+        <tr v-for="(todo) in pagination.paginatedTodo" :key="todo.id">
           <td><span :class="{ 'strike-through': todo.done }">
               {{ todo.name }}
             </span></td>
@@ -41,10 +42,11 @@
     <div class="pagination">
       <button @click="onPageChange($event, 1)">
         {{ '<<' }} </button>
-          <button v-for="(page, index) in paginationNumbers" :key="index" @click="onPageChange($event, page)">
+          <button v-for="(page, index) in pagination.paginationNumbers" :key="index"
+            @click="onPageChange($event, page)">
             {{ page }}
           </button>
-          <button @click="onPageChange($event, lastPage)">
+          <button @click="onPageChange($event, pagination.lastPage)">
             {{ '>>' }}
           </button>
     </div>
@@ -64,13 +66,15 @@ export default {
     todoButtonLabel: 'Add todo',
     isUpdate: false,
     hasTodos: false,
-    currPage: DEFAULT_FIRST_PAGE,
-    lastPage: 0,
-    paginationNumbers: [],
-    firstIndex: null,
-    lastIndex: null,
-    pageSize: DEFAULT_PAGE_SIZE,
-    paginatedTodo: []
+    pagination: {
+      currPage: DEFAULT_FIRST_PAGE,
+      lastPage: 0,
+      paginationNumbers: [],
+      firstIndex: null,
+      lastIndex: null,
+      pageSize: DEFAULT_PAGE_SIZE,
+      paginatedTodo: []
+    }
    }
   },
  
@@ -80,23 +84,23 @@ export default {
 
     this.headers = headersName();
 
-    this.pagination();
+    this.handlePagination();
 
   },
  
   methods : {
 
-    pagination() {
+    handlePagination() {
 
-      this.firstIndex = firstDataIndex(this.currPage);
+      this.pagination.firstIndex = firstDataIndex(this.pagination.currPage);
 
-      this.lastIndex = lastDataIndex(this.firstIndex);
+      this.pagination.lastIndex = lastDataIndex(this.pagination.firstIndex);
 
-      this.paginatedTodo = this.currPage === DEFAULT_FIRST_PAGE
+      this.pagination.paginatedTodo = this.pagination.currPage === DEFAULT_FIRST_PAGE
 
-      ? this.todos.slice(0, DEFAULT_PAGE_SIZE)
+      ? this.todos.slice(0, this.pagination.pageSize)
 
-      : this.todos.slice(this.firstIndex, this.lastIndex);
+      : this.todos.slice(this.pagination.firstIndex, this.pagination.lastIndex);
 
     },
 
@@ -179,6 +183,12 @@ export default {
 
       this.todos = this.todos.filter(todo => todo.id !== id);
 
+      if (this.pagination.currPage > DEFAULT_FIRST_PAGE && this.pagination.paginatedTodo.length === 1) {
+
+        this.pagination.currPage = this.pagination.currPage - 1;
+
+      }
+
     },
 
     editTodo(e, todo) {
@@ -214,7 +224,7 @@ export default {
 
       e.stopPropagation();
 
-      this.currPage = pageNumber;
+      this.pagination.currPage = pageNumber;
     
     }
   },
@@ -229,13 +239,13 @@ export default {
 
        if(this.todos?.length > 0) {
 
-        this.lastPage = Math.ceil(this.todos?.length / DEFAULT_PAGE_SIZE);
+        this.pagination.lastPage = Math.ceil(this.todos?.length / this.pagination.pageSize);
 
-        this.paginationNumbers = [];
+        this.pagination.paginationNumbers = [];
 
-        for (let i = 1; i <= this.lastPage; i++) {
+        for (let i = 1; i <= this.pagination.lastPage; i++) {
 
-          this.paginationNumbers.push(i);
+          this.pagination.paginationNumbers.push(i);
 
         }
 
@@ -248,13 +258,13 @@ export default {
       deep: true,
     },
 
-    currPage: {
+    'pagination.currPage': {
 
       handler(newValue, oldValue) {
 
         if(newValue == oldValue) return;
 
-        this.pagination();
+        this.handlePagination();
 
       },
 
@@ -270,7 +280,11 @@ export default {
 
 .container {
   padding: 32px;
-  width: 1260px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 th,
