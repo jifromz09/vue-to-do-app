@@ -1,14 +1,14 @@
 <template>
-  <div style="padding: 32px;">
+  <div class="container">
     <h1>{{ 'Simple todo app' }}</h1>
     <form @submit.prevent="saveTodo" class="form">
-      <label for="newItem">{{'New Item: '}} </label>
+      <label for="newItem">{{'Todo name: '}} </label>
       <input type="text" id="newItem" name="todo" v-model="newTodo.name">
       <button type="submit" name="submit">{{ todoButtonLabel }} </button>
     </form>
 
     <!-- To do: Refactor table into dynamic table-->
-    <table v-if="todos?.length > 0" class="todo-table">
+    <table v-if="paginatedTodo?.length > 0" class="todo-table">
       <!-- To do: Refactor table head into separate component-->
       <thead>
         <tr>
@@ -17,7 +17,7 @@
       </thead>
       <tbody>
         <!-- To do: Refactor into Todo component-->
-        <tr v-for="(todo) in todos" :key="todo.id">
+        <tr v-for="(todo) in paginatedTodo" :key="todo.id">
           <td><span :class="{ 'strike-through': todo.done }">
               {{ todo.name }}
             </span></td>
@@ -33,14 +33,27 @@
         </tr>
       </tbody>
     </table>
+
     <div v-else>
       <p>{{ 'No to do available!' }}</p>
     </div>
+
+    <div class="pagination">
+      <button @click="onPageChange($event, 1)">
+        {{ '<<' }} </button>
+          <button v-for="(page, index) in paginationNumbers" :key="index" @click="onPageChange($event, page)">
+            {{ page }}
+          </button>
+          <button @click="onPageChange($event, lastPage)">
+            {{ '>>' }}
+          </button>
+    </div>
+
   </div>
 </template>
 <script>
 
-import { retrivedDataFromLocalStorage, saveDataToLocalStorage, headersName} from './utils';
+import { retrivedDataFromLocalStorage, saveDataToLocalStorage, headersName, firstDataIndex, lastDataIndex,DEFAULT_FIRST_PAGE, DEFAULT_PAGE_SIZE} from './utils';
  
 export default {
   name: 'App',
@@ -51,6 +64,13 @@ export default {
     todoButtonLabel: 'Add todo',
     isUpdate: false,
     hasTodos: false,
+    currPage: DEFAULT_FIRST_PAGE,
+    lastPage: 0,
+    paginationNumbers: [],
+    firstIndex: null,
+    lastIndex: null,
+    pageSize: DEFAULT_PAGE_SIZE,
+    paginatedTodo: []
    }
   },
  
@@ -60,9 +80,25 @@ export default {
 
     this.headers = headersName();
 
+    this.pagination();
+
   },
  
   methods : {
+
+    pagination() {
+
+      this.firstIndex = firstDataIndex(this.currPage);
+
+      this.lastIndex = lastDataIndex(this.firstIndex);
+
+      this.paginatedTodo = this.currPage === DEFAULT_FIRST_PAGE
+
+      ? this.todos.slice(0, DEFAULT_PAGE_SIZE)
+
+      : this.todos.slice(this.firstIndex, this.lastIndex);
+
+    },
 
     addTodo() {
 
@@ -172,6 +208,14 @@ export default {
       return todo;
 
       });
+    },
+
+    onPageChange(e, pageNumber) {
+
+      e.stopPropagation();
+
+      this.currPage = pageNumber;
+    
     }
   },
 
@@ -185,13 +229,36 @@ export default {
 
        if(this.todos?.length > 0) {
 
+        this.lastPage = Math.ceil(this.todos?.length / DEFAULT_PAGE_SIZE);
+
+        this.paginationNumbers = [];
+
+        for (let i = 1; i <= this.lastPage; i++) {
+
+          this.paginationNumbers.push(i);
+
+        }
+
         this.hasTodos = true;
         
        }
          
       },
 
-      deep: true  
+      deep: true,
+    },
+
+    currPage: {
+
+      handler(newValue, oldValue) {
+
+        if(newValue == oldValue) return;
+
+        this.pagination();
+
+      },
+
+      deep: true, 
     }
   }
 }
@@ -200,6 +267,12 @@ export default {
 
 <style scoped>
 /* Scoped styles for this component only */
+
+.container {
+  padding: 32px;
+  width: 1260px;
+}
+
 th,
 td {
   border: 1px solid;
@@ -259,5 +332,14 @@ h1 {
 
 .strike-through {
   text-decoration: line-through;
+}
+
+.pagination {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  justify-content: end;
+  align-items: center;
+  width: 600px;
 }
 </style>
