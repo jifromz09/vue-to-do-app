@@ -1,29 +1,30 @@
 <template>
-  <div>
-    <div>
-      <form @submit.prevent="saveTodo">
-        <label for="newItem">{{'New Item: '}} </label>
-        <input type="text" id="newItem" v-model="newTodo.name">
-        <button type="submit">{{ todoButtonLabel }} </button>
-      </form>
-    </div>
+  <div style="padding: 32px;">
+    <h1>{{ 'Simple todo app' }}</h1>
+    <form @submit.prevent="saveTodo" class="form">
+      <label for="newItem">{{'New Item: '}} </label>
+      <input type="text" id="newItem" name="todo" v-model="newTodo.name">
+      <button type="submit" name="submit">{{ todoButtonLabel }} </button>
+    </form>
+
     <!-- To do: Refactor table into dynamic table-->
-    <table v-if="todos?.length > 0">
+    <table v-if="todos?.length > 0" class="todo-table">
       <!-- To do: Refactor table head into separate component-->
       <thead>
         <tr>
           <th v-for="(header, index) in headers" :key="index">{{ header}}</th>
         </tr>
       </thead>
-
       <tbody>
         <!-- To do: Refactor into Todo component-->
         <tr v-for="(todo) in todos" :key="todo.id">
-          <td>{{ todo.name }}</td>
-          <td>{{ todo.done ? 'Done' : 'Todo' }}</td>
+          <td><span :class="{ 'strike-through': todo.done }">
+              {{ todo.name }}
+            </span></td>
+          <td>{{ todo.done ? 'Done' : 'To do' }}</td>
           <td>{{ todo.dateCompleted}}</td>
           <td>
-            <div>
+            <div class="action-btn-container">
               <button @click="editTodo($event, todo)">{{ 'Edit' }}</button>
               <button @click="updateTodoStatus($event, todo.id)">{{ !todo.dateCompleted ? 'Done': "Undo" }}</button>
               <button @click="removeTodo($event, todo.id)">{{ 'Delete' }}</button>
@@ -32,46 +33,36 @@
         </tr>
       </tbody>
     </table>
- 
     <div v-else>
       <p>{{ 'No to do available!' }}</p>
     </div>
   </div>
 </template>
 <script>
+
+import { retrivedDataFromLocalStorage, saveDataToLocalStorage, headersName} from './utils';
  
 export default {
   name: 'App',
   data() {
    return {
-    headers: ["Name", "Status", "Date completed", "Action"],
     todos: [],
     newTodo: {id: null, name: "", done: false, dateCompleted: ""},
     todoButtonLabel: 'Add todo',
     isUpdate: false,
-    hasTodos: false
+    hasTodos: false,
    }
   },
  
   created() {
 
-    this.retrivedDataFromLocalStorage();
+    this.todos = retrivedDataFromLocalStorage();
+
+    this.headers = headersName();
 
   },
  
   methods : {
-
-    saveDataToLocalStorage() {
-
-      localStorage.setItem("todos", JSON.stringify(this.todos));
-
-    },
-
-    retrivedDataFromLocalStorage() {
-
-      this.todos = JSON.parse(localStorage.getItem('todos'));
-
-    },
 
     addTodo() {
 
@@ -190,7 +181,7 @@ export default {
 
       handler() {
 
-       this.saveDataToLocalStorage();
+       saveDataToLocalStorage(this.todos);
 
        if(this.todos?.length > 0) {
 
@@ -206,3 +197,67 @@ export default {
 }
 
 </script>
+
+<style scoped>
+/* Scoped styles for this component only */
+th,
+td {
+  border: 1px solid;
+  padding: 6px 0px 6px 0px;
+}
+
+tr {
+  text-align: center;
+}
+
+thead {
+  background-color: darkgrey;
+}
+
+form {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  align-items: center;
+}
+
+.todo-table {
+  width: 600px;
+  border-spacing: 2px;
+}
+
+input[name="todo"] {
+  border-radius: 3px;
+  padding-left: 6px;
+  padding: 4px;
+  width: 280px;
+}
+
+button[name="submit"] {
+  padding: 4px;
+}
+
+.action-btn-container {
+  gap: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn-container button {
+  padding: 4px;
+}
+
+button {
+  border-radius: 3px;
+}
+
+h1 {
+  text-align: center;
+  width: 600px;
+}
+
+.strike-through {
+  text-decoration: line-through;
+}
+</style>
