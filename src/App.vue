@@ -55,7 +55,7 @@
 </template>
 <script>
 
-import { retrivedDataFromLocalStorage, saveDataToLocalStorage, headersName, firstDataIndex, lastDataIndex,DEFAULT_FIRST_PAGE, DEFAULT_PAGE_SIZE} from './utils';
+import { retrivedDataFromLocalStorage, saveDataToLocalStorage, headersName, firstDataIndex, lastDataIndex,DEFAULT_FIRST_PAGE, DEFAULT_PAGE_SIZE } from './utils';
  
 export default {
   name: 'App',
