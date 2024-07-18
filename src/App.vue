@@ -39,7 +39,7 @@
       <p>{{ 'No to do available!' }}</p>
     </div>
 
-    <div class="pagination">
+    <div class="pagination" v-show="pagination.paginationNumbers?.length > 1">
       <button @click="onPageChange($event, 1)">
         {{ '<<' }} </button>
           <button v-for="(page, index) in pagination.paginationNumbers" :key="index"
@@ -80,7 +80,7 @@ export default {
  
   created() {
 
-    this.todos = retrivedDataFromLocalStorage();
+    this.todos = retrivedDataFromLocalStorage() || [];
 
     this.headers = headersName();
 
@@ -92,21 +92,23 @@ export default {
 
     handlePagination() {
 
+      console.log(this.todos)
+
       this.pagination.firstIndex = firstDataIndex(this.pagination.currPage);
 
       this.pagination.lastIndex = lastDataIndex(this.pagination.firstIndex);
 
       this.pagination.paginatedTodo = this.pagination.currPage === DEFAULT_FIRST_PAGE
 
-      ? this.todos.slice(0, this.pagination.pageSize)
+      ? this.todos?.slice(0, this.pagination.pageSize)
 
-      : this.todos.slice(this.pagination.firstIndex, this.pagination.lastIndex);
+      : this.todos.slice(this.pagination.firstIndex, this.pagination.lastIndex) ;
 
     },
 
     addTodo() {
 
-      const existingTodo = this.todos.find(todo => todo.name === this.newTodo.name);
+      const existingTodo = this.todos.length > 0 ? this.todos.find(todo => todo.name === this.newTodo.name) : null;
 
       if(this.todos.length > 0 && existingTodo) {
 
@@ -250,7 +252,15 @@ export default {
         }
 
         this.hasTodos = true;
+
+        this.handlePagination(); 
         
+       } else {
+
+        this.pagination.paginatedTodo = [];
+
+        this.pagination.paginationNumbers = [];
+
        }
          
       },
