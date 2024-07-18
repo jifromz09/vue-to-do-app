@@ -35,8 +35,8 @@
       </tbody>
     </table>
 
-    <div v-else>
-      <p>{{ 'No to do available!' }}</p>
+    <div v-else class="empty-container">
+      <p name="empty">{{ 'No to do available!' }}</p>
     </div>
 
     <div class="pagination" v-show="pagination.paginationNumbers?.length > 1">
@@ -286,6 +286,11 @@ export default {
 <style scoped>
 /* Scoped styles for this component only */
 
+body {
+  font-family: monospace;
+  font-size: large;
+}
+
 .container {
   padding: 32px;
   width: 100%;
@@ -364,4 +369,22 @@ h1 {
   align-items: center;
   width: 600px;
 }
+
+p[name="empty"] {
+  margin: 0px;
+  padding: 0px;
+}
+
+.empty-container {
+  display: flex;
+  padding: 10px;
+  align-items: center;
+  width: 420px;
+  justify-content: center;
+  border-radius: 3px;
+  border: 2px solid #E53935;
+  background-color: #EF5350;
+  color: whitesmoke;
+}
+
 </style>
