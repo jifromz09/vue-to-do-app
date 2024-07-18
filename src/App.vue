@@ -92,8 +92,6 @@ export default {
 
     handlePagination() {
 
-      console.log(this.todos)
-
       this.pagination.firstIndex = firstDataIndex(this.pagination.currPage);
 
       this.pagination.lastIndex = lastDataIndex(this.pagination.firstIndex);
